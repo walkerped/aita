@@ -40,12 +40,15 @@ def aita_predict(model_path, data_to_predict, device):
     from transformers import (BigBirdForSequenceClassification, Trainer
                             , TrainingArguments)
     import torch
+    from accelerate import DataLoaderConfiguration, Accelerator
 
     def data_collector(features):
         batch = {}
         batch['input_ids'] = torch.stack([f[0] for f in features])
         batch['attention_mask'] = torch.stack([f[1] for f in features])
         return batch
+
+    accelorator = Accelerator()
 
     model_loaded = BigBirdForSequenceClassification.from_pretrained(
         model_path).to(device)

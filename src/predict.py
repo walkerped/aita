@@ -3,7 +3,8 @@ import os
 from dotenv import load_dotenv, find_dotenv
 import praw
 import pandas as pd
-from datetime import datetime
+pd.options.mode.chained_assignment = None
+from datetime import datetime, timezone
 import numpy as np
 
 sys.path.insert(0,'./config')
@@ -11,10 +12,11 @@ from config_predict import *
 from judgesComments import judges_comments
 sys.path.insert(0,'./src/utils')
 from utils import *
+import pytz
+
 
 # set df with running predictions that have not been resolved
 current_sheet_df = read_csv_ifexist(current_sheet_path)
-
 
 ################# use praw to pull AITA posts, and load into df #################
 
@@ -57,19 +59,16 @@ if current_sheet_df is not None:
       ~abbrev_post_df['title'].isin(current_sheet_df['title'])
       ]
 else:
-  filtered_post_df = current_sheet_df
+  filtered_post_df = abbrev_post_df
 
-# filtered_post_df['post_date'] = filtered_post_df['created_utc'].apply(
-#     lambda x: datetime.utcfromtimestamp(x).strftime('%Y-%m-%d')
-#     )
-filtered_post_df['post_date'] = filtered_post_df['created_utc'].apply(
-    lambda x: datetime.datetime.fromtimestamp(x, datetime.UTC).strftime('%Y-%m-%d')
-    )
-print(filtered_post_df)
-filtered_post_df['titles_and_texts'] = (filtered_post_df['title']
+filtered_post_df.loc[:, 'post_date'] = filtered_post_df['created_utc'].apply(
+    lambda x: datetime.fromtimestamp(x).astimezone(pytz.utc).strftime('%Y-%m-%d')
+)
+
+filtered_post_df.loc[:, 'titles_and_texts'] = (filtered_post_df['title']
                                           + filtered_post_df['selftext'])
 
-filtered_post_df['date_created'] = datetime.today().strftime('%m-%d-%Y')
+filtered_post_df.loc[:, 'date_created'] = datetime.today().strftime('%Y-%m-%d')
 
 post_df = filtered_post_df.drop(['created_utc','selftext'], axis=1)
 
@@ -91,9 +90,9 @@ bin_pred_list = (pred.predictions > 0.5).astype(np.int32).reshape(-1)
 
 pred_df = post_df[['title', 'post_date', 'url', 'date_created']]
 
-pred_df['logits'] = logits_list
+pred_df.loc[:, 'logits'] = logits_list
 
-pred_df['pred'] = bin_pred_list
+pred_df.loc[:, 'pred'] = bin_pred_list
 
 if not quiet:
     print('Top lines of df with prediction info:')
@@ -101,9 +100,10 @@ if not quiet:
 
 
 # get 10% most extreme pos and neg predictions, respectively
-pred_percentile_df = subset_extremes(pred_df, 'pred', 'logits')
+pred_percentile_df = subset_extremes(pred_df, 'pred', 'logits', quiet=quiet)
 
-print(pred_percentile_df.sort_values('logits'))
+if not quiet:
+    print(pred_percentile_df.sort_values('logits'))
 
 ################# select posts to tweet and tweet them w prediction #################
 selected_preds_df = pred_percentile_df.sample(n=n_tweets)

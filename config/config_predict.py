@@ -17,7 +17,7 @@ current_sheet_path = os.path.join(sheet_path,'unresolved_predictions.csv')
 dotenv_path = os.path.join(main_path,'.env')
 
 # set number of reddit posts to pull, before selecting those to tweet out
-n_posts = 100
+n_posts = 500
 
 # set number of predictions to turn into tweets
 n_tweets = 2
