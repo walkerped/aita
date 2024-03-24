@@ -1,0 +1,10 @@
+# Reddit API credentials
+CLIENT_ID = 'yourClientID'
+CLIENT_SECRET = 'yourClientSecret'
+USER_AGENT = 'yourUserAgent'
+
+# Twitter API credentials
+CONSUMER_KEY = 'yourConsumerKey'
+CONSUMER_SECRET = 'yourConsumerSecret'
+ACCESS_TOKEN = 'yourAccessToken'
+ACCESS_TOKEN_SECRET = 'yourAccessTokenSecret'
