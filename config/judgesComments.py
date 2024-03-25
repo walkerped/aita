@@ -50,6 +50,7 @@ judges_comments = {
 	    ,'(╬•᷅д•᷄╬)'
 	    ,'乁( 0͡ Ĺ̯ 0͡ ) ㄏ'
 	    ,'(¬‿¬”)'
+            ,'Gotta go. The new TAZ podcast ep just dropped.'
 	    ],
 	'nta': [
 	    'The innocent must go free!'
@@ -102,5 +103,7 @@ judges_comments = {
 	    ,'(ꈍ ᴗ ꈍ✿)'
 	    ,'( *ˊᴗˋ)'
 	    ,'=(^・^)='
-	    ]
+            ,'I gotta go now, the new NADPOD ep just dropped.'
+	    ,'Goodbye, sweeties.'
+]
 }
