@@ -1,7 +1,12 @@
+import os
+import sys
+sys.path.insert(0,'./config')
+from config_assess import *
+from judgesComments import judges_comments
+
 # set user defined vars
 
 # paths
-main_path = '/content/gdrive/MyDrive/Colab Notebooks/aita_new/'
 sheet_path = os.path.join(main_path,'prediction_sheets')
 unresolved_preds_path = os.path.join(sheet_path,'unresolved_predictions.csv')
 
