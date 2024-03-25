@@ -1,0 +1,10 @@
+accelerate==0.28.0
+numpy==1.26.4
+pandas==2.2.1
+praw==7.7.1
+python-dotenv==1.0.1
+pytz==2023.3.post1
+sentencepiece==0.1.99
+torch==2.2.1
+transformers==4.39.1
+tweepy==4.14.0
