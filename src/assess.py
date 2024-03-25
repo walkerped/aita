@@ -2,17 +2,27 @@ import os
 import sys
 sys.path.insert(0,'./config')
 from config_assess import *
+sys.path.insert(0,'./src/utils')
+from utils import *
 from judgesComments import judges_comments
+import pandas as pd
 
 # set user defined vars
 
 # paths
-sheet_path = os.path.join(main_path,'prediction_sheets')
+sheet_path = os.path.join(main_path
+        ,'data/app_tracking/prediction_sheets/')
 unresolved_preds_path = os.path.join(sheet_path,'unresolved_predictions.csv')
 
 # read in unresolved_preds_path as a pandas df
-unresolved_preds_df = pd.read_csv(unresolved_preds_path)
-display(unresolved_preds_df)
+# set df with running predictions that have not been resolved
+if os.path.exists(unresolved_preds_path):
+  unresolved_preds_df = pd.read_csv(unresolved_preds_path, index_col = 0)
+else:
+  print("No unresolved prediction spreadsheet. Exiting.")
+  quit()
+
+print(unresolved_preds_df)
 
 # prompt: use praw to search the aita subreddit for the titles in unresolved_preds_df
 # Authenticate
