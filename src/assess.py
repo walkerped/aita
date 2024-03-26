@@ -195,6 +195,8 @@ incorrect_strings = [
 # def assign_flavor_string:
 for index, row in new_resolved_df.iterrows():
 
+  title_trunc = f"\"{smart_truncate(row['title'])}\""
+
   judge_ruling = label_name_dict[row['pred']]
   reddit_ruling = label_name_dict[row['outcome']]
 
@@ -206,7 +208,7 @@ for index, row in new_resolved_df.iterrows():
     judge_acc = 'incorrect'
 
   full_string = (
-      f"In the case of \"{row['title']}\". Judge bot ruled {judge_ruling}. "
+      f"In the case of \"{title_trunc}\". Judge bot ruled {judge_ruling}. "
       f"Reddit ruled {reddit_ruling}. The Judge was {judge_acc}! {comment_string}"
   )
 
