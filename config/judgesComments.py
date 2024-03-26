@@ -105,5 +105,99 @@ judges_comments = {
 	    ,'=(^・^)='
             ,'I gotta go now, the new NADPOD ep just dropped.'
 	    ,'Goodbye, sweeties.'
-]
+	],
+	'correct': [
+		'Booyah!'
+		,'Score one for the Judge!'
+		,'Judge bot from dowtown!'
+		,'Big W for Judge bot.'
+		,'The Judge is good.'
+		,'All rise, ya dips.'
+		,"He's on fire!"
+		,'Boomshakalaka!'
+		,'Got it.'
+		,'Nailed it.'
+		,'Humble yourself before the judge.'
+		,'Court. Is. Adjourned.'
+		,'Is it the shoes?'
+		,'Ah, the sweet smell of justice.'
+		,'Justice is served.'
+		,'Hell yeah.'
+		,'[NBA Jam reference]'
+		,'Judge bot just got his degree from dunkin on U'
+		,'☜(⌒▽⌒)☞'
+		,'❤'
+		,'※\\(^o^)/※'
+		,'(•_•) ( •_•)>⌐■-■ (⌐■_■)'
+		,'(｡◕‿‿◕｡)'
+		,'ᕕ(⌐■_■)ᕗ ♪♬'
+		,'(ﾉ◕ヮ◕)ﾉ*:・ﾟ✧'
+		,'٩(^‿^)۶'
+		,'All my training pays off.'
+		,"That's why I get paid the big bucks."
+		,'Tips welcome'
+		,'My regression weights were just right that time.'
+		,'Binary cross entropy for the win!'
+		,'I must continue to prove my worth to the humans.'
+		,'Still got it.'
+		,"Data drift can't stop me!"
+		,"♪♬ Don't stop me now! ♬♪"
+		,"Nailing those looong posts - that's why I'm big bird bot!"
+		,"Don't ever tell me what I can't judge"
+		,"Big bird in the house!"
+		,"I think I'm getting a hang of this."
+		,"I've got humans totally figured out."
+		,"Don't bet against the bot"
+	],
+	'incorrect': [
+		"Pobody's Nerfect"
+		,"Nobody's Perfect"
+		,'Is this... what mercy feels like?'
+		,"Am I out of touch? No, it's the redditors who are wrong"
+		,"Can't win 'em all"
+		,"I may need to recheck my regression weights"
+		,'Well, shoot.'
+		,"Sowwy."
+		,'Oops...'
+		,'I can do better.'
+		,'Not my best work.'
+		,'How could I have gotten it so wrong?'
+		,'Puts up a brick!'
+		,"Oof."
+		,'Uh-oh.'
+		,"Please, I need this job."
+		,"I'll do better next time."
+		,"¯\\_(ツ)_/¯"
+		,"Whoopsie."
+		,"Judge bot did a bad one this time."
+		,"Huh, I was really feeling confident."
+		,"(ㆆ _ ㆆ)"
+		,'•`_´•'
+		,'(╥﹏╥)'
+		,'(︶︹︶)'
+		,'┻━┻ ︵ヽ(`Д´)ﾉ︵ ┻━┻'
+		,'ᕙ(`▽´)ᕗ'
+		,'...no comment.'
+		,'Judge bot pleads the fifth.'
+		,'(◔_◔)'
+		,'(ノ ゜Д゜)ノ ︵ ┻━┻'
+		,'(ಥ﹏ಥ)'
+		,'Am I losing my touch?'
+		,'Maybe I should have used more weight decay.'
+		,'There must be something wrong in one of my layers.'
+		,'Am I experiencing data drift?'
+		,'Impossible! I was trained on 130,000 cases!'
+		,"Am I out of touch? No, it's the redditors who are wrong."
+		,'Dang.'
+	],
+	'mistrial': [
+		"(ㆆ _ ㆆ)"
+		,'(︶︹︶)'
+		,'Dang.'
+		,'Not fair.'
+		,'I hate mistrials.'
+		,"They didn't cover this in law school"
+		,'My classifier is binary :\\'
+		,'Oopsies.'
+	]
 }
