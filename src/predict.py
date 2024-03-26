@@ -6,6 +6,7 @@ import pandas as pd
 pd.options.mode.chained_assignment = None
 from datetime import datetime, timezone
 import numpy as np
+from random import (choice, seed)
 
 sys.path.insert(0,'./config')
 from config_predict import *
@@ -114,7 +115,7 @@ intro_string = 'Judge bot has heard the case of'
 ruling_string = 'Judge bot rules:'
 
 label_name_dict = {0:'NTA', 1:'YTA'}
-from random import (choice, seed)
+
 seed(a=None, version=2)
 
 # create and post tweet

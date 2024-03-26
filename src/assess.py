@@ -9,7 +9,7 @@ from judgesComments import judges_comments
 import pandas as pd
 import praw
 from datetime import datetime
-from random import choice
+from random import (choice, seed)
 
 # set user defined vars
 
@@ -122,13 +122,13 @@ correct_strings = [
     ,'Court. Is. Adjourned.'
     ,'Is it the shoes?'
     ,'Ah, the sweet smell of justice.'
-    ,'Judgement is served.'
+    ,'Justice is served.'
     ,'Hell yeah.'
     ,'[NBA Jam reference]'
     ,'Judge bot just got his degree from dunkin on U'
     ,'☜(⌒▽⌒)☞'
     ,'❤'
-    ,'※\(^o^)/※'
+    ,'※\\(^o^)/※'
     ,'(•_•) ( •_•)>⌐■-■ (⌐■_■)'
     ,'(｡◕‿‿◕｡)'
     ,'ᕕ(⌐■_■)ᕗ ♪♬'
@@ -141,7 +141,7 @@ correct_strings = [
     ,'Binary cross entropy for the win!'
     ,'I must continue to prove my worth to the humans.'
     ,'Still got it.'
-    ,'Data drift can stop me!'
+    ,"Data drift can't stop me!"
     ,"♪♬ Don't stop me now! ♬♪"
     ,"Nailing those looong posts - that's why I'm big bird bot!"
     ,"Don't ever tell me what I can't judge"
@@ -168,7 +168,7 @@ incorrect_strings = [
     ,'Uh-oh.'
     ,"Please, I need this job."
     ,"I'll do better next time."
-    ,"¯\_(ツ)_/¯"
+    ,"¯\\_(ツ)_/¯"
     ,"Whoopsie."
     ,"Judge bot did a bad one this time."
     ,"Huh, I was really feeling confident."
@@ -191,6 +191,18 @@ incorrect_strings = [
     ,"Am I out of touch? No, it's the redditors who are wrong."
     ,'Dang.'
     ]
+mistrial_strings=[
+  "(ㆆ _ ㆆ)"
+  ,'(︶︹︶)'
+  ,'Dang.'
+  ,'Not fair.'
+  ,'I hate mistrials.'
+  ,"They didn't cover this in law school"
+  ,'My classifier is binary :\\'
+  ,'Oopsies.'
+]
+
+seed(a=None, version=2)
 
 # def assign_flavor_string:
 for index, row in new_resolved_df.iterrows():
@@ -200,16 +212,19 @@ for index, row in new_resolved_df.iterrows():
   judge_ruling = label_name_dict[row['pred']]
   reddit_ruling = label_name_dict[row['outcome']]
 
-  if int(row['pred'])==row['outcome']:
+  if row['outcome']>1:
+    comment_string = choice(mistrial_strings)
+    judge_acc = f"Judge bot was not trained to rule on {row['outcome_str']} cases - let's call it a mistrial."
+  elif row['pred']==row['outcome']:
     comment_string = choice(correct_strings)
-    judge_acc = 'correct'
+    judge_acc = 'I was correct!'
   else:
     comment_string = choice(incorrect_strings)
-    judge_acc = 'incorrect'
+    judge_acc = 'I was incorrect!'
 
   full_string = (
-      f"In the case of \"{title_trunc}\". Judge bot ruled {judge_ruling}. "
-      f"Reddit ruled {reddit_ruling}. The Judge was {judge_acc}! {comment_string}"
+      f"In the case of {title_trunc}. Judge bot ruled {judge_ruling}. "
+      f"Reddit ruled {reddit_ruling}. {judge_acc} {comment_string}"
   )
 
   print(full_string)
