@@ -7,6 +7,7 @@ sys.path.insert(0,'./src/utils')
 from utils import *
 from judgesComments import judges_comments
 import pandas as pd
+import praw
 
 # set user defined vars
 
@@ -29,16 +30,16 @@ print(unresolved_preds_df)
 # including reddit and twitter credentials
 load_dotenv(dotenv_path)
 
-# prompt: use praw to search the aita subreddit for the titles in unresolved_preds_df
 # Authenticate
 reddit = praw.Reddit(
-    client_id=CLIENT_ID,
-    client_secret=CLIENT_SECRET,
-    user_agent=USER_AGENT
+    client_id=os.environ.get("CLIENT_ID"),
+    client_secret=os.environ.get("CLIENT_SECRET"),
+    user_agent=os.environ.get("USER_AGENT")
 )
 
+
 # get the subreddit
-aita_subreddit = reddit.subreddit(SUBREDDIT_NAME)
+aita_subreddit = reddit.subreddit('AmITheAsshole')
 
 resolved_titles = []
 resolved_outcomes = []
