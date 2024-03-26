@@ -8,6 +8,7 @@ from utils import *
 from judgesComments import judges_comments
 import pandas as pd
 import praw
+from datetime import datetime
 
 # set user defined vars
 
@@ -90,6 +91,13 @@ print(resolved_df)
 import pandas as pd
 merged_preds_df = pd.merge(unresolved_preds_df, resolved_df, on='title', how='left')
 print(merged_preds_df)
+
+#create two new dfs from merged_preds_df one named new_resolved_df with a valid (not NaN) value for outcome, and one new_unresolved_preds_df where outcome is nan
+new_resolved_df = merged_preds_df[pd.notnull(merged_preds_df['outcome'])]
+new_unresolved_preds_df = merged_preds_df[pd.isnull(merged_preds_df['outcome'])]
+
+print(new_resolved_df)
+print(new_unresolved_preds_df)
 
 #write new_resolved_df to the aita_new directory
 today = datetime.today().strftime('%Y-%m-%d-%H-%M')
