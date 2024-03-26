@@ -1,5 +1,6 @@
 import os
 import sys
+from dotenv import load_dotenv
 sys.path.insert(0,'./config')
 from config_assess import *
 sys.path.insert(0,'./src/utils')
@@ -23,6 +24,10 @@ else:
   quit()
 
 print(unresolved_preds_df)
+
+# load variables from .env as environment variables
+# including reddit and twitter credentials
+load_dotenv(dotenv_path)
 
 # prompt: use praw to search the aita subreddit for the titles in unresolved_preds_df
 # Authenticate
