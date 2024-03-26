@@ -26,8 +26,6 @@ else:
   print("No unresolved prediction spreadsheet. Exiting.")
   quit()
 
-print(unresolved_preds_df)
-
 # load variables from .env as environment variables
 # including reddit and twitter credentials
 load_dotenv(dotenv_path)
@@ -39,14 +37,12 @@ reddit = praw.Reddit(
     user_agent=os.environ.get("USER_AGENT")
 )
 
-
 # get the subreddit
 aita_subreddit = reddit.subreddit('AmITheAsshole')
 
 resolved_titles = []
 resolved_outcomes = []
 for index, row in unresolved_preds_df.iterrows():
-
 
   # search the subreddit for the title
   results = aita_subreddit.search(row['title'], limit=1)
@@ -62,7 +58,6 @@ for index, row in unresolved_preds_df.iterrows():
 resolved_df = pd.DataFrame.from_dict(
     {'title':resolved_titles,'outcome_str':resolved_outcomes}
 )
-print(resolved_df)
 
 def code_outcome(outcome):
   YTA_strings = ['ASSHOLE','YTA',"YOU'RE THE ASSHOLE"]
@@ -85,30 +80,25 @@ def code_outcome(outcome):
 
 resolved_df['outcome'] = resolved_df['outcome_str'].apply(code_outcome)
 
-print(resolved_df)
-
-# prompt: merge resolved_df and unresolved_preds_df on title
-
-import pandas as pd
+# merge resolved_df and unresolved_preds_df on title
 merged_preds_df = pd.merge(unresolved_preds_df, resolved_df, on='title', how='left')
-print(merged_preds_df)
 
 #create two new dfs from merged_preds_df one named new_resolved_df with a valid (not NaN) value for outcome, and one new_unresolved_preds_df where outcome is nan
 new_resolved_df = merged_preds_df[pd.notnull(merged_preds_df['outcome'])]
 new_unresolved_preds_df = merged_preds_df[pd.isnull(merged_preds_df['outcome'])]
 
-print(new_resolved_df)
-print(new_unresolved_preds_df)
-
-#write new_resolved_df to the aita_new directory
-today = datetime.today().strftime('%Y-%m-%d-%H-%M')
-new_resolved_df.to_csv(os.path.join(main_path
-                          ,f'data/app_tracking/prediction_sheets/resolved_predictions/new_resolved_df_{today}.csv'),index=False)
+if not quiet:
+  print('Top rows of df tracking resolved predictions: ')
+  print(new_resolved_df.head())
+  print('Top rows of df tracking unresolved predictions:')
+  print(new_unresolved_preds_df)
 
 label_name_dict = {0:'NTA', 1:'YTA', 2:'Everybody sucks', 3:'Not enough info'}
 
 seed(a=None, version=2)
 
+if not quiet:
+  print('Tweet strings: ')
 # def assign_flavor_string:
 for index, row in new_resolved_df.iterrows():
 
@@ -132,5 +122,12 @@ for index, row in new_resolved_df.iterrows():
       f"Reddit ruled {reddit_ruling}. {judge_acc} {comment_string}"
   )
 
-  print(full_string)
+  if not quiet:
+    print(full_string)
+
+#write new_resolved_df to the aita_new directory
+if not dry_run:
+  today = datetime.today().strftime('%Y-%m-%d-%H-%M')
+  new_resolved_df.to_csv(os.path.join(main_path
+                            ,f'data/app_tracking/prediction_sheets/resolved_predictions/new_resolved_df_{today}.csv'),index=False)
 

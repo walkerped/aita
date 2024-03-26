@@ -1,5 +1,8 @@
 import os
 
+# dry run?
+dry_run = 1
+
 # quiet?
 quiet = True
 
