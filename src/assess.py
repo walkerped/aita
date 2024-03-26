@@ -9,6 +9,7 @@ from judgesComments import judges_comments
 import pandas as pd
 import praw
 from datetime import datetime
+from random import choice
 
 # set user defined vars
 
@@ -101,10 +102,10 @@ print(new_unresolved_preds_df)
 
 #write new_resolved_df to the aita_new directory
 today = datetime.today().strftime('%Y-%m-%d-%H-%M')
-new_resolved_df.to_csv(os.path.join(main_path,f'prediction_sheets/resolved_predictions/new_resolved_df_{today}.csv'),index=False)
+new_resolved_df.to_csv(os.path.join(main_path
+                          ,f'data/app_tracking/prediction_sheets/resolved_predictions/new_resolved_df_{today}.csv'),index=False)
 
-intro_string = 'Judge bot is ready to rule on the case of'
-ruling_string = 'Judge bot rules:'
+label_name_dict = {0:'NTA', 1:'YTA', 2:'Everybody sucks', 3:'Not enough info'}
 
 correct_strings = [
     'Booyah!'
@@ -142,7 +143,7 @@ correct_strings = [
     ,'Still got it.'
     ,'Data drift can stop me!'
     ,"♪♬ Don't stop me now! ♬♪"
-    ,"Nailing those looong posts - that's why I'm big bird bot"
+    ,"Nailing those looong posts - that's why I'm big bird bot!"
     ,"Don't ever tell me what I can't judge"
     ,"Big bird in the house!"
     ,"I think I'm getting a hang of this."
@@ -188,19 +189,26 @@ incorrect_strings = [
     ,'Am I experiencing data drift?'
     ,'Impossible! I was trained on 130,000 cases!'
     ,"Am I out of touch? No, it's the redditors who are wrong."
+    ,'Dang.'
     ]
 
 # def assign_flavor_string:
-for index, row in selected_preds_df.iterrows():
+for index, row in new_resolved_df.iterrows():
 
-  if row['pred']==0:
-    comment_string = choice(nta_strings)
-  if row['pred']==1:
-    comment_string = choice(yta_strings)
+  judge_ruling = label_name_dict[row['pred']]
+  reddit_ruling = label_name_dict[row['outcome']]
+
+  if int(row['pred'])==row['outcome']:
+    comment_string = choice(correct_strings)
+    judge_acc = 'correct'
+  else:
+    comment_string = choice(incorrect_strings)
+    judge_acc = 'incorrect'
 
   full_string = (
-      f"{intro_string} \"{row['title']}\". {ruling_string} "
-      f"{label_name_dict[row['pred']]}. {comment_string}"
+      f"In the case of \"{row['title']}\". Judge bot ruled {judge_ruling}. "
+      f"Reddit ruled {reddit_ruling}. The Judge was {judge_acc}! {comment_string}"
   )
 
   print(full_string)
+
