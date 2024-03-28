@@ -118,6 +118,7 @@ label_name_dict = {0:'NTA', 1:'YTA'}
 
 seed(a=None, version=2)
 
+tweet_id_list = []
 # create and post tweet
 for index, row in selected_preds_df.iterrows():
 
@@ -131,8 +132,10 @@ for index, row in selected_preds_df.iterrows():
     )
 
     # post to twitter
-    client.create_tweet(text=full_tweet_string)
+    tweet_id = client.create_tweet(text=full_tweet_string)
+    tweet_id_list =+ [tweet_id]    
 
+new_pred_df["tweet_id"] = tweet_id_list
 
 new_pred_df = update_df(current_sheet_df,selected_preds_df)
 

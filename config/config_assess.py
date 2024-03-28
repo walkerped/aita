@@ -1,10 +1,10 @@
 import os
 
 # dry run?
-dry_run = 1
+dry_run = 0
 
 # quiet?
-quiet = True
+quiet = False
 
 # paths
 main_path = '.'

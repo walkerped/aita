@@ -10,6 +10,7 @@ import pandas as pd
 import praw
 from datetime import datetime
 from random import (choice, seed)
+import shutil
 
 # set user defined vars
 
@@ -125,9 +126,21 @@ for index, row in new_resolved_df.iterrows():
   if not quiet:
     print(full_string)
 
+today = datetime.today().strftime('%Y-%m-%d-%H-%M')
+new_resolved_sheet_archive = (f'data/app_tracking/prediction_sheets/resolved_predictions/new_resolved_df_{today}.csv')
+
+def copy_and_replace(source_path, destination_path):
+    if os.path.exists(destination_path) and os.path.exists(source_path):
+        os.remove(destination_path)
+    shutil.copy2(source_path, destination_path)
+
 #write new_resolved_df to the aita_new directory
 if not dry_run:
+  new_resolved_df_csv = os.path.join(main_path,new_resolved_sheet_archive)
   today = datetime.today().strftime('%Y-%m-%d-%H-%M')
-  new_resolved_df.to_csv(os.path.join(main_path
-                            ,f'data/app_tracking/prediction_sheets/resolved_predictions/new_resolved_df_{today}.csv'),index=False)
+  new_resolved_df.to_csv(new_resolved_df_csv,index=False)
+  if new_resolved_df is not None:
+    copy_and_replace(new_resolved_df_csv,unresolved_preds_path)
+  if not quiet:
+    print(new_resolved_df.head())
 
