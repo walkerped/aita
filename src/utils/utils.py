@@ -6,7 +6,7 @@ def read_csv_ifexist(csv_path):
     if os.path.exists(csv_path):
         sheet_df = pd.read_csv(csv_path, index_col = 0)
     else:
-        sheet_df = None
+        sheet_df = pd.DataFrame()
     return sheet_df
 
 # assign GPU as device if available, otherwise CPU

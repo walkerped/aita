@@ -25,7 +25,7 @@ current_sheet_df = read_csv_ifexist(current_sheet_path)
 # including reddit and twitter credentials
 load_dotenv(dotenv_path)
 
-if not quiet:
+if not quiet and not current_sheet_df.empty:
     print(
         f'loading sheet from {current_sheet_path}'
     )
@@ -55,12 +55,12 @@ index_no_flair = raw_post_df[raw_post_df['link_flair_text'].notnull()].index
 
 abbrev_post_df = raw_post_df[vars_to_keep].drop(index_no_flair)
 
-if current_sheet_df is not None:
-  filtered_post_df = abbrev_post_df[
-      ~abbrev_post_df['title'].isin(current_sheet_df['title'])
-      ]
+if current_sheet_df.empty:
+    filtered_post_df = abbrev_post_df
 else:
-  filtered_post_df = abbrev_post_df
+    filtered_post_df = abbrev_post_df[
+        ~abbrev_post_df['title'].isin(current_sheet_df['title'])
+        ]
 
 filtered_post_df.loc[:, 'post_date'] = filtered_post_df['created_utc'].apply(
     lambda x: datetime.fromtimestamp(x).astimezone(pytz.utc).strftime('%Y-%m-%d')
@@ -133,11 +133,14 @@ for index, row in selected_preds_df.iterrows():
 
     # post to twitter
     tweet_id = client.create_tweet(text=full_tweet_string)
-    tweet_id_list =+ [tweet_id]    
+    tweet_id_list.append(tweet_id[0]['id'])
 
-new_pred_df["tweet_id"] = tweet_id_list
+selected_preds_df["tweet_id"] = tweet_id_list
 
-new_pred_df = update_df(current_sheet_df,selected_preds_df)
+if current_sheet_df.empty:
+    new_pred_df = selected_preds_df
+else:
+    new_pred_df = update_df(current_sheet_df,selected_preds_df)
 
 new_pred_df.reset_index(drop=True).to_csv(path_or_buf=current_sheet_path)
 
