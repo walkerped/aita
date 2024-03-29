@@ -125,3 +125,29 @@ def update_df(existing_df,new_def):
   concat_df = pd.concat([existing_df,new_def])
   return concat_df.drop_duplicates(ignore_index=True)
 
+# function to recode reddit post flairs into mutually exclusive outcomes
+def code_outcome(outcome):
+  YTA_strings = ['ASSHOLE','YTA',"YOU'RE THE ASSHOLE"]
+  NTA_strings = ['NOT THE A-HOLE','NOT THE ASSHOLE','NTA']
+  ESH_strings = [
+      'EVERYONE SUCKS','ESH','EVERBODY SUCKS','EVERYONE SUCKS HERE'
+      , 'EVERYBODY SUCKS HERE'
+      ]
+  info_strings = ['NOT ENOUGH INFO', 'NEI', 'NOT ENOUGH INFO HERE']
+  if outcome:
+    if outcome.upper() in YTA_strings:
+      return 1
+    elif outcome.upper() in NTA_strings:
+      return 0
+    elif outcome.upper() in ESH_strings:
+      return 2
+    elif outcome.upper() in info_strings:
+      return 3
+    
+# copy and replace function
+def copy_and_replace(source_path, destination_path):
+    import os
+    import shutil
+    if os.path.exists(destination_path) and os.path.exists(source_path):
+        os.remove(destination_path)
+    shutil.copy2(source_path, destination_path)

@@ -5,6 +5,7 @@ sys.path.insert(0,'./config')
 from config_assess import *
 sys.path.insert(0,'./src/utils')
 from utils import *
+from assess_helpers import *
 from judgesComments import judges_comments
 import pandas as pd
 import praw
@@ -41,6 +42,7 @@ reddit = praw.Reddit(
 # get the subreddit
 aita_subreddit = reddit.subreddit('AmITheAsshole')
 
+# search praw for each unresolved prediction post
 resolved_titles = []
 resolved_outcomes = []
 for index, row in unresolved_preds_df.iterrows():
@@ -60,26 +62,11 @@ resolved_df = pd.DataFrame.from_dict(
     {'title':resolved_titles,'outcome_str':resolved_outcomes}
 )
 
-def code_outcome(outcome):
-  YTA_strings = ['ASSHOLE','YTA',"YOU'RE THE ASSHOLE"]
-  NTA_strings = ['NOT THE A-HOLE','NOT THE ASSHOLE','NTA']
-  ESH_strings = [
-      'EVERYONE SUCKS','ESH','EVERBODY SUCKS','EVERYONE SUCKS HERE'
-      , 'EVERYBODY SUCKS HERE'
-      ]
-  info_strings = ['NOT ENOUGH INFO', 'NEI', 'NOT ENOUGH INFO HERE']
-  if outcome:
-    if outcome.upper() in YTA_strings:
-      return 1
-    elif outcome.upper() in NTA_strings:
-      return 0
-    elif outcome.upper() in ESH_strings:
-      return 2
-    elif outcome.upper() in info_strings:
-      return 3
-
-
 resolved_df['outcome'] = resolved_df['outcome_str'].apply(code_outcome)
+
+if resolved_df['outcome'].isnull().all():
+  print('None of the pending prediction posts have been assigned a valid flair. Exiting.')
+  exit()
 
 # merge resolved_df and unresolved_preds_df on title
 merged_preds_df = pd.merge(unresolved_preds_df, resolved_df, on='title', how='left')
@@ -129,11 +116,6 @@ for index, row in new_resolved_df.iterrows():
 today = datetime.today().strftime('%Y-%m-%d-%H-%M')
 new_resolved_sheet_archive = (f'data/app_tracking/prediction_sheets/resolved_predictions/new_resolved_df_{today}.csv')
 
-def copy_and_replace(source_path, destination_path):
-    if os.path.exists(destination_path) and os.path.exists(source_path):
-        os.remove(destination_path)
-    shutil.copy2(source_path, destination_path)
-
 #write new_resolved_df to the aita_new directory
 if not dry_run:
   new_resolved_df_csv = os.path.join(main_path,new_resolved_sheet_archive)
@@ -144,3 +126,4 @@ if not dry_run:
   if not quiet:
     print(new_resolved_df.head())
 
+# client.create_tweet(text='Some reply', in_reply_to_tweet_id=42)
