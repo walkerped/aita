@@ -72,8 +72,8 @@ if resolved_df['outcome'].isnull().all():
 merged_preds_df = pd.merge(unresolved_preds_df, resolved_df, on='title', how='left')
 
 #create two new dfs from merged_preds_df one named new_resolved_df with a valid (not NaN) value for outcome, and one new_unresolved_preds_df where outcome is nan
-new_resolved_df = merged_preds_df[pd.notnull(merged_preds_df['outcome'])]
-new_unresolved_preds_df = merged_preds_df[pd.isnull(merged_preds_df['outcome'])]
+new_resolved_df = merged_preds_df[pd.notnull(merged_preds_df['outcome'])].reset_index()
+new_unresolved_preds_df = merged_preds_df[pd.isnull(merged_preds_df['outcome'])].reset_index()
 
 if not quiet:
   print('Top rows of df tracking resolved predictions: ')
@@ -84,6 +84,8 @@ if not quiet:
 label_name_dict = {0:'NTA', 1:'YTA', 2:'Everybody sucks', 3:'Not enough info'}
 
 seed(a=None, version=2)
+
+client = tweepy_auth()
 
 if not quiet:
   print('Tweet strings: ')
@@ -113,6 +115,12 @@ for index, row in new_resolved_df.iterrows():
   if not quiet:
     print(full_string)
 
+  if not dry_run:
+    # post to twitter
+    client.create_tweet(text='Some reply', in_reply_to_tweet_id=row["tweet_id"])
+    tweet_id = client.create_tweet(text=full_tweet_string)
+
+
 today = datetime.today().strftime('%Y-%m-%d-%H-%M')
 new_resolved_sheet_archive = (f'data/app_tracking/prediction_sheets/resolved_predictions/new_resolved_df_{today}.csv')
 
@@ -124,6 +132,7 @@ if not dry_run:
   if new_resolved_df is not None:
     copy_and_replace(new_resolved_df_csv,unresolved_preds_path)
   if not quiet:
+    print('Top lines of new resolved dfs')
     print(new_resolved_df.head())
 
-# client.create_tweet(text='Some reply', in_reply_to_tweet_id=42)
+

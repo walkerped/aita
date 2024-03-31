@@ -20,4 +20,4 @@ dotenv_path = os.path.join(main_path,'.env')
 n_posts = 500
 
 # set number of predictions to turn into tweets
-n_tweets = 2
+n_tweets = 12
