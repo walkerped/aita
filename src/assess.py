@@ -5,7 +5,6 @@ sys.path.insert(0,'./config')
 from config_assess import *
 sys.path.insert(0,'./src/utils')
 from utils import *
-from assess_helpers import *
 from judgesComments import judges_comments
 import pandas as pd
 import praw
