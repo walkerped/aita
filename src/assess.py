@@ -118,7 +118,7 @@ for index, row in new_resolved_df.iterrows():
       f"PREDICTION UPDATE: "
       f"In the case of {title_trunc}. Judge bot ruled {judge_ruling}. "
       f"Reddit ruled {reddit_ruling}. {judge_acc} {comment_string} "
-      f"https://twitter.com/AITA_judgebot/status/{row["tweet_id"]}"
+      f"https://twitter.com/AITA_judgebot/status/{row['tweet_id']}"
   )
 
   if not quiet:
