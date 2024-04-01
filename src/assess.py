@@ -70,10 +70,17 @@ if resolved_df['outcome'].isnull().all():
 
 # merge resolved_df and unresolved_preds_df on title
 merged_preds_df = pd.merge(unresolved_preds_df, resolved_df, on='title', how='left')
+print('\nunresolved\n',unresolved_preds_df,'\nresolved\n',resolved_df,'\nmerged\n',merged_preds_df
+# ,merged_preds_df['outcome_x'],merged_preds_df['outcome_y']
+)
 
 #create two new dfs from merged_preds_df one named new_resolved_df with a valid (not NaN) value for outcome, and one new_unresolved_preds_df where outcome is nan
+
 new_resolved_df = merged_preds_df[pd.notnull(merged_preds_df['outcome'])].reset_index()
-new_unresolved_preds_df = merged_preds_df[pd.isnull(merged_preds_df['outcome'])].reset_index()
+new_unresolved_preds_df = merged_preds_df[pd.isnull(
+  merged_preds_df['outcome'])].drop(
+    ['outcome','outcome_str'], axis=1
+    ).reset_index()
 
 if not quiet:
   print('Top rows of df tracking resolved predictions: ')
@@ -108,8 +115,10 @@ for index, row in new_resolved_df.iterrows():
     judge_acc = 'I was incorrect!'
 
   full_string = (
+      f"PREDICTION UPDATE: "
       f"In the case of {title_trunc}. Judge bot ruled {judge_ruling}. "
-      f"Reddit ruled {reddit_ruling}. {judge_acc} {comment_string}"
+      f"Reddit ruled {reddit_ruling}. {judge_acc} {comment_string} "
+      f"https://twitter.com/AITA_judgebot/status/{row["tweet_id"]}"
   )
 
   if not quiet:
@@ -117,8 +126,7 @@ for index, row in new_resolved_df.iterrows():
 
   if not dry_run:
     # post to twitter
-    client.create_tweet(text='Some reply', in_reply_to_tweet_id=row["tweet_id"])
-    tweet_id = client.create_tweet(text=full_tweet_string)
+    client.create_tweet(text=full_string)
 
 
 today = datetime.today().strftime('%Y-%m-%d-%H-%M')

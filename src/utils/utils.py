@@ -136,13 +136,13 @@ def code_outcome(outcome):
   info_strings = ['NOT ENOUGH INFO', 'NEI', 'NOT ENOUGH INFO HERE']
   if outcome:
     if outcome.upper() in YTA_strings:
-      return 1
+      return float(1)
     elif outcome.upper() in NTA_strings:
-      return 0
+      return float(0)
     elif outcome.upper() in ESH_strings:
-      return 2
+      return float(2)
     elif outcome.upper() in info_strings:
-      return 3
+      return float(3)
     
 # copy and replace function
 def copy_and_replace(source_path, destination_path):
