@@ -51,9 +51,9 @@ raw_post_df = pd.DataFrame(
 
 vars_to_keep = ['title','selftext','link_flair_text','created_utc','url']
 
-index_no_flair = raw_post_df[raw_post_df['link_flair_text'].notnull()].index
+index_flair = raw_post_df[raw_post_df['link_flair_text'].notnull()].index
 
-abbrev_post_df = raw_post_df[vars_to_keep].drop(index_no_flair)
+abbrev_post_df = raw_post_df[vars_to_keep].drop(index_flair)
 
 if current_sheet_df.empty:
     filtered_post_df = abbrev_post_df
