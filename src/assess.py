@@ -129,7 +129,7 @@ for index, row in new_resolved_df.iterrows():
 
 
 today = datetime.today().strftime('%Y-%m-%d-%H-%M')
-new_resolved_sheet_archive = (f'data/app_tracking/prediction_sheets/resolved_predictions/new_resolved_df_{today}.csv')
+new_resolved_sheet_archive = (f'{archive_sheet_path}/new_resolved_df_{today}.csv')
 
 #write new_resolved_df to the aita_new directory
 if not dry_run:
