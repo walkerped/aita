@@ -12,12 +12,6 @@ from datetime import datetime
 from random import (choice, seed)
 import shutil
 
-# set user defined vars
-
-# paths
-sheet_path = os.path.join(main_path
-        ,'data/app_tracking/prediction_sheets/')
-unresolved_preds_path = os.path.join(sheet_path,'unresolved_predictions.csv')
 
 # read in unresolved_preds_path as a pandas df
 # set df with running predictions that have not been resolved
