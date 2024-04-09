@@ -151,3 +151,47 @@ def copy_and_replace(source_path, destination_path):
     if os.path.exists(destination_path) and os.path.exists(source_path):
         os.remove(destination_path)
     shutil.copy2(source_path, destination_path)
+
+# binomial stats class
+class binomial_stats:
+  def __init__(self,df_col):
+
+    import numpy as np
+
+    self.df_col = df_col
+
+    self._success = self.df_col.sum()
+
+    self._n = len(df_col)
+
+    self._rate = self._success/self._n
+
+    self._sd_prop = np.sqrt(self._rate*(1-self._rate))
+
+    self._sd_n = np.sqrt(self._rate*(1-self._rate)*self._n)
+
+    self._se = np.sqrt(self._rate*(1-self._rate)/self._n)
+
+  @property
+  def success(self):
+      return self._success
+
+  @property
+  def n(self):
+      return self._n
+
+  @property
+  def rate(self):
+      return self._rate
+
+  @property
+  def sd_prop(self):
+      return self._sd_prop
+
+  @property
+  def sd_n(self):
+      return self._sd_n
+
+  @property
+  def se(self):
+      return self._se
