@@ -13,7 +13,7 @@ main_path = '.'
 model_path = os.path.join(main_path,'models','fullModel')
 
 # path to sheets
-sheet_path = os.path.join(main_path,'prediction_sheets')
+sheet_path = os.path.join(main_path,'data/app_tracking/prediction_sheets')
 unresolved_preds_path = os.path.join(sheet_path,'unresolved_predictions.csv')
 archive_sheet_path = os.path.join(sheet_path,'resolved_predictions')
 
