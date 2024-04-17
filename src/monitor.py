@@ -26,7 +26,7 @@ if not os.path.exists(monitor_archive_path):
 YTA_strings = ['ASSHOLE','YTA',"YOU'RE THE ASSHOLE"]
 NTA_strings = ['NOT THE A-HOLE','NOT THE ASSHOLE','NTA']
 
-today = datetime.today().strftime('%m-%d-%Y')
+today = datetime.today().strftime('%Y-%m-%d')
 
 # load variables from .env as environment variables
 # including reddit and twitter credentials
@@ -48,7 +48,8 @@ new_posts = subreddit.new(limit=n_posts)
 
 
 # Clear lists and counts
-titles_and_texts = []
+submission_ids = []
+texts = []
 flairs = []
 dates = []
 titles = []
@@ -79,47 +80,48 @@ for post in new_posts:
 
   post_date = datetime.fromtimestamp(post.created_utc).astimezone(pytz.utc).strftime('%Y-%m-%d')
 
-  combined_text = post.title + ' ' + post.selftext  # Combine title and text
-  titles_and_texts.append(combined_text)
+  submission_ids.append(post.id)
   titles.append(post.title)
+  texts.append(post.selftext)
   flairs.append(post.link_flair_text)
   dates.append(post_date)
-
-# import pprint
-# print(post.title)
-# pprint.pprint(vars(post))
+  
 print(f'Got {YTA_count} YTAs and {NTA_count} NTAs after going through ')
 print(f'{post_count} posts.')
 
 # create df with combined_text and flairs and dates as columns
 post_df = pd.DataFrame({
-    'combined_text': titles_and_texts,
+    'submission_ids': submission_ids,
+    'titles': titles,
+    'texts': texts,
     'outcome_str': flairs,
     'dates': dates,
 })
 
+post_df['combined_text'] = post_df[['titles','texts']].apply(lambda row: ' '.join(row.values.astype(str)), axis=1)
+
 post_df['outcome'] = post_df['outcome_str'].apply(code_outcome)
 
-print(post_df)
+# !!!!!!!!! should remove redundant posts here so we aren't re-doing predictions each time
+old_files = files_last_n_days(raw_data_path, 7, exclude_today = True)
 
-# for each value in post_df["outcome"] randomly select rows with that value
-'''
-for each value in df["colname"], randomly select N rows and subset to those rows
-'''
-def random_n_by_cat(df,df_colname,n):
-  return (df.groupby(df_colname)
-              .apply(lambda x: x.sample(n=n))
-              .reset_index(drop=True))
+past_week_df = pd.concat((pd.read_csv(f) for f in old_files), ignore_index=True)
 
-balanced_posts_df = random_n_by_cat(post_df,"outcome",YTA_count)
+if past_week_df.empty:
+    filtered_post_df = post_df
+else:
+    filtered_post_df = post_df[
+        ~post_df['submission_ids'].isin(past_week_df['submission_ids'])
+        ]
+print('past week',past_week_df)
+print('current posts',post_df,post_df['titles'])
+print('filtered',filtered_post_df)
 
-print(balanced_posts_df)
-
-################# make prediction for each post #################
+# ################# make prediction for each post #################
 
 device = assign_torch_device()
 
-to_predict_dataset = aita_prep_data(balanced_posts_df['combined_text'].tolist())
+to_predict_dataset = aita_prep_data((filtered_post_df['combined_text']).tolist())
 
 pred = aita_predict(model_path,to_predict_dataset, device)
 
@@ -127,7 +129,7 @@ logits_list = pred.predictions.reshape(-1)
 bin_pred_list = (pred.predictions > 0.5).astype(np.int32).reshape(-1)
 
 # add logits_list and bin_pred_list to balanced_posts_df
-preds_df = balanced_posts_df
+preds_df = filtered_post_df
 
 preds_df['logits'] = logits_list
 preds_df['predictions'] = bin_pred_list
@@ -139,112 +141,131 @@ preds_df['accurate'] = (
 
 print(preds_df)
 
+raw_data_csv = os.path.join(raw_data_path, f"sample_{today}.csv")
+if overwrite_day == True or not os.path.exists(raw_data_csv):
+  # create sample data
+  os.makedirs(raw_data_path, exist_ok=True)
+  preds_df.drop('combined_text',axis=1).to_csv(os.path.join(raw_data_csv))
+exit()
+# # for each value in post_df["outcome"] randomly select rows with that value
+# '''
+# for each value in df["colname"], randomly select N rows and subset to those rows
+# '''
+# def random_n_by_cat(df,df_colname,n):
+#   return (df.groupby(df_colname)
+#               .apply(lambda x: x.sample(n=n))
+#               .reset_index(drop=True))
 
-acc_binom = binomial_stats(preds_df['accurate'])
+# balanced_posts_df = random_n_by_cat(post_df,"outcome",YTA_count)
 
-YTA_acc_binom = binomial_stats(preds_df[preds_df['outcome'] == 1]['accurate'])
+# print(balanced_posts_df)
+  
 
-NTA_acc_binom = binomial_stats(preds_df[preds_df['outcome'] == 0]['accurate'])
+# acc_binom = binomial_stats(preds_df['accurate'])
 
-# create binom df
-new_monitor_dict = {
-    'date':today
-    , 'outcome_type':['Total','YTA','NTA']
-    , 'success':[acc_binom.success,YTA_acc_binom.success,NTA_acc_binom.success]
-    , 'n':[acc_binom.n,YTA_acc_binom.n,NTA_acc_binom.n]
-    , 'rate':[acc_binom.rate,YTA_acc_binom.rate,NTA_acc_binom.rate]
-    , 'se':[acc_binom.se,YTA_acc_binom.se,NTA_acc_binom.se]
-    , 'min_post_date':[
-        post_df["dates"].min(),post_df["dates"].min(),post_df["dates"].min()]
-    , 'max_post_date':[
-        post_df["dates"].max(),post_df["dates"].max(),post_df["dates"].max()]
-}
+# YTA_acc_binom = binomial_stats(preds_df[preds_df['outcome'] == 1]['accurate'])
 
-new_monitor_df = pd.DataFrame.from_dict(new_monitor_dict)
+# NTA_acc_binom = binomial_stats(preds_df[preds_df['outcome'] == 0]['accurate'])
 
-for index, row in new_monitor_df.iterrows():
-  print(
-      f'{row["outcome_type"]} Accuracy Rate: {row["rate"]:.1%}'
-      f' SE: {row["se"]:.1%}'
-      )
+# # create binom df
+# new_monitor_dict = {
+#     'date':today
+#     , 'outcome_type':['Total','YTA','NTA']
+#     , 'success':[acc_binom.success,YTA_acc_binom.success,NTA_acc_binom.success]
+#     , 'n':[acc_binom.n,YTA_acc_binom.n,NTA_acc_binom.n]
+#     , 'rate':[acc_binom.rate,YTA_acc_binom.rate,NTA_acc_binom.rate]
+#     , 'se':[acc_binom.se,YTA_acc_binom.se,NTA_acc_binom.se]
+#     , 'min_post_date':[
+#         post_df["dates"].min(),post_df["dates"].min(),post_df["dates"].min()]
+#     , 'max_post_date':[
+#         post_df["dates"].max(),post_df["dates"].max(),post_df["dates"].max()]
+# }
 
-#read in current_monitor_df from csv
+# new_monitor_df = pd.DataFrame.from_dict(new_monitor_dict)
 
-current_monitor_csv = os.path.join(monitor_sheet_path, "current_monitor.csv")
-if os.path.exists(current_monitor_csv):
+# for index, row in new_monitor_df.iterrows():
+#   print(
+#       f'{row["outcome_type"]} Accuracy Rate: {row["rate"]:.1%}'
+#       f' SE: {row["se"]:.1%}'
+#       )
 
-  current_monitor_df = pd.read_csv(current_monitor_csv)
+# #read in current_monitor_df from csv
 
-  if overwrite_day == True and today in current_monitor_df['date'].values:
+# current_monitor_csv = os.path.join(monitor_sheet_path, "current_monitor.csv")
+# if os.path.exists(current_monitor_csv):
 
-    current_monitor_df = current_monitor_df[current_monitor_df['date'] != today]
+#   current_monitor_df = pd.read_csv(current_monitor_csv)
 
-  if not today in current_monitor_df['date'].values:
+#   if overwrite_day == True and today in current_monitor_df['date'].values:
 
-    new_current_monitor_df = pd.concat([current_monitor_df,new_monitor_df])
+#     current_monitor_df = current_monitor_df[current_monitor_df['date'] != today]
 
-    # create an archive copy
-    new_current_monitor_df.to_csv(os.path.join(
-      monitor_archive_path, f'monitor_{today}.csv'), index=False)
+#   if not today in current_monitor_df['date'].values:
 
-    # save as current
-    new_current_monitor_df.to_csv(current_monitor_csv, index=False)
+#     new_current_monitor_df = pd.concat([current_monitor_df,new_monitor_df])
 
-  else:
+#     # create an archive copy
+#     new_current_monitor_df.to_csv(os.path.join(
+#       monitor_archive_path, f'monitor_{today}.csv'), index=False)
 
-    print(f"{current_monitor_csv} already contains entries with today's date")
-    print(f"sheet will not be updated, current predictions will not be archived")
+#     # save as current
+#     new_current_monitor_df.to_csv(current_monitor_csv, index=False)
+
+#   else:
+
+#     print(f"{current_monitor_csv} already contains entries with today's date")
+#     print(f"sheet will not be updated, current predictions will not be archived")
 
 
-else:
-  new_current_monitor_df = new_monitor_df
+# else:
+#   new_current_monitor_df = new_monitor_df
 
-  # create an archive copy
-  new_current_monitor_df.to_csv(os.path.join(
-      monitor_archive_path, f'monitor_{today}.csv'), index=False)
+#   # create an archive copy
+#   new_current_monitor_df.to_csv(os.path.join(
+#       monitor_archive_path, f'monitor_{today}.csv'), index=False)
 
-  # save as current
-  new_current_monitor_df.to_csv(current_monitor_csv, index=False)
+#   # save as current
+#   new_current_monitor_df.to_csv(current_monitor_csv, index=False)
 
-# create plot
+# # create plot
 
-# Filter data
-total_data = new_current_monitor_df[new_current_monitor_df['outcome_type'] == 'Total']
+# # Filter data
+# total_data = new_current_monitor_df[new_current_monitor_df['outcome_type'] == 'Total']
 
-# Calculate the mean proportion
-mean_proportion = total_data['rate'].mean()
+# # Calculate the mean proportion
+# mean_proportion = total_data['rate'].mean()
 
-# Calculate the standard deviation of the proportion
-std_dev_proportion = total_data['rate'].std()
+# # Calculate the standard deviation of the proportion
+# std_dev_proportion = total_data['rate'].std()
 
-# Calculate the control limits (assuming normal approximation)
-UCL = mean_proportion + 3 * std_dev_proportion
-LCL = mean_proportion - 3 * std_dev_proportion
+# # Calculate the control limits (assuming normal approximation)
+# UCL = mean_proportion + 3 * std_dev_proportion
+# LCL = mean_proportion - 3 * std_dev_proportion
 
-# Create plot
-plt.figure(figsize=(8, 6))
+# # Create plot
+# plt.figure(figsize=(8, 6))
 
-# Plot data with error bars
-plt.errorbar(total_data['date'], total_data['rate'], yerr=total_data['se'], capsize=5, color='black', zorder=1)
+# # Plot data with error bars
+# plt.errorbar(total_data['date'], total_data['rate'], yerr=total_data['se'], capsize=5, color='black', zorder=1)
 
-# Plot the control limits
-plt.axhline(y=mean_proportion, color='#B7410E', linestyle='--', label='Mean', zorder=5, alpha=.75)
-plt.axhline(y=UCL, color='gray', linestyle='--', label='Control Limits', zorder=2)
-plt.axhline(y=LCL, color='gray', linestyle='--', label='_Hidden label', zorder=2)
+# # Plot the control limits
+# plt.axhline(y=mean_proportion, color='#B7410E', linestyle='--', label='Mean', zorder=5, alpha=.75)
+# plt.axhline(y=UCL, color='gray', linestyle='--', label='Control Limits', zorder=2)
+# plt.axhline(y=LCL, color='gray', linestyle='--', label='_Hidden label', zorder=2)
 
-# Plot data points
-plt.plot(total_data['date'], total_data['rate'], 'o', color='teal', markeredgecolor='black', zorder=4, markersize=14)
+# # Plot data points
+# plt.plot(total_data['date'], total_data['rate'], 'o', color='teal', markeredgecolor='black', zorder=4, markersize=14)
 
-# Customize ticks
-plt.xticks(fontsize=12)
-plt.yticks(fontsize=12)
+# # Customize ticks
+# plt.xticks(fontsize=12)
+# plt.yticks(fontsize=12)
 
-# Add labels and title
-plt.xlabel('Date', fontsize=14)
-plt.ylabel('Accuracy Rate', fontsize=14)
-plt.title('Judgebot Accuracy Over Time', fontsize=14)
-plt.legend()
+# # Add labels and title
+# plt.xlabel('Date', fontsize=14)
+# plt.ylabel('Accuracy Rate', fontsize=14)
+# plt.title('Judgebot Accuracy Over Time', fontsize=14)
+# plt.legend()
 
-# Show plot
-plt.tight_layout()
-plt.show()
+# # Show plot
+# plt.tight_layout()
+# plt.show()

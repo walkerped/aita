@@ -195,3 +195,36 @@ class binomial_stats:
   @property
   def se(self):
       return self._se
+  
+import os
+from datetime import datetime, timedelta
+
+def files_last_n_days(directory, n, date_format="%Y-%m-%d", exclude_today=False):
+    """
+    Find files with dates from the last n days in the filename.
+
+    Parameters:
+    directory (str): The directory to search for files.
+    n (int): The number of days to look back.
+
+    Returns:
+    list: A list of file paths that match the criteria.
+    """
+
+    if exclude_today == True:
+        date_range = range(1,n)
+    else:
+       date_range = range(n)
+
+    today = datetime.now()
+    last_n_days = [today - timedelta(days=i) for i in date_range]
+
+    matching_files = []
+    for filename in os.listdir(directory):
+        for day in last_n_days:
+            date_str = day.strftime(date_format)
+            if date_str in filename:
+                matching_files.append(os.path.join(directory, filename))
+                break
+
+    return matching_files

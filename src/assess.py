@@ -64,7 +64,6 @@ if resolved_df['outcome'].isnull().all():
 # merge resolved_df and unresolved_preds_df on title
 merged_preds_df = pd.merge(unresolved_preds_df, resolved_df, on='title', how='left')
 print('\nunresolved\n',unresolved_preds_df,'\nresolved\n',resolved_df,'\nmerged\n',merged_preds_df
-# ,merged_preds_df['outcome_x'],merged_preds_df['outcome_y']
 )
 
 #create two new dfs from merged_preds_df one named new_resolved_df with a valid (not NaN) value for outcome, and one new_unresolved_preds_df where outcome is nan
@@ -125,13 +124,17 @@ for index, row in new_resolved_df.iterrows():
 today = datetime.today().strftime('%Y-%m-%d-%H-%M')
 new_resolved_sheet_archive = (f'{archive_sheet_path}/new_resolved_df_{today}.csv')
 
-#write new_resolved_df to the aita_new directory
+# write new_resolved_df to the aita_new directory and write new unresolved csv
 if not dry_run:
   new_resolved_df_csv = os.path.join(main_path,new_resolved_sheet_archive)
   today = datetime.today().strftime('%Y-%m-%d-%H-%M')
   new_resolved_df.to_csv(new_resolved_df_csv,index=False)
-  if new_resolved_df is not None:
-    copy_and_replace(new_resolved_df_csv,unresolved_preds_path)
+  # replace unresolved csv if there are any still unresolved, otherwise
+  # delete unresolved csv
+  if new_unresolved_preds_df is not None:
+    copy_and_replace(new_unresolved_preds_df,unresolved_preds_path)
+  else:
+    os.remove(unresolved_preds_path)
   if not quiet:
     print('Top lines of new resolved dfs')
     print(new_resolved_df.head())
