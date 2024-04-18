@@ -132,7 +132,7 @@ if not dry_run:
   # replace unresolved csv if there are any still unresolved, otherwise
   # delete unresolved csv
   if new_unresolved_preds_df is not None:
-    copy_and_replace(new_unresolved_preds_df,unresolved_preds_path)
+    new_unresolved_preds_df.to_csv(unresolved_preds_path,index=False)
   else:
     os.remove(unresolved_preds_path)
   if not quiet:
