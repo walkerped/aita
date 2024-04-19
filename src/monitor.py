@@ -102,7 +102,7 @@ post_df['combined_text'] = post_df[['titles','texts']].apply(lambda row: ' '.joi
 
 post_df['outcome'] = post_df['outcome_str'].apply(code_outcome)
 
-# !!!!!!!!! should remove redundant posts here so we aren't re-doing predictions each time
+os.makedirs(raw_data_path, exist_ok=True)
 old_files = files_last_n_days(raw_data_path, 7, exclude_today = True)
 
 past_week_df = pd.concat((pd.read_csv(f) for f in old_files), ignore_index=True)
@@ -143,8 +143,6 @@ print(preds_df)
 
 raw_data_csv = os.path.join(raw_data_path, f"sample_{today}.csv")
 if overwrite_day == True or not os.path.exists(raw_data_csv):
-  # create sample data
-  os.makedirs(raw_data_path, exist_ok=True)
   preds_df.drop('combined_text',axis=1).to_csv(os.path.join(raw_data_csv))
 exit()
 # # for each value in post_df["outcome"] randomly select rows with that value
