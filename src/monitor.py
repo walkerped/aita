@@ -107,7 +107,8 @@ old_files = files_last_n_days(raw_data_path, 7, exclude_today = True)
 
 if old_files:
   past_week_df = pd.concat((pd.read_csv(f) for f in old_files), ignore_index=True)
-
+else:
+  past_week_df = pd.DataFrame()
 
 if past_week_df.empty:
     filtered_post_df = post_df
