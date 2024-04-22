@@ -103,7 +103,7 @@ post_df['combined_text'] = post_df[['titles','texts']].apply(lambda row: ' '.joi
 post_df['outcome'] = post_df['outcome_str'].apply(code_outcome)
 
 os.makedirs(raw_data_path, exist_ok=True)
-old_files = files_last_n_days(raw_data_path, 7, exclude_today = True)
+old_files = files_last_n_days(raw_data_path, 21, exclude_today = True)
 
 if old_files:
   past_week_df = pd.concat((pd.read_csv(f) for f in old_files), ignore_index=True)
