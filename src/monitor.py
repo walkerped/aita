@@ -65,8 +65,8 @@ for post in new_posts:
   # predictions
   if not post.link_flair_text:
     continue
-  if not post.link_flair_text.upper() in NTA_strings + YTA_strings:
-    continue
+  # if not post.link_flair_text.upper() in NTA_strings + YTA_strings:
+  #   continue
 
   # remove posts that are unusually short or long, as these may not be
   # actual AITA posts, or may have been deleted or edited by OP
@@ -103,22 +103,32 @@ post_df['combined_text'] = post_df[['titles','texts']].apply(lambda row: ' '.joi
 post_df['outcome'] = post_df['outcome_str'].apply(code_outcome)
 
 os.makedirs(raw_data_path, exist_ok=True)
-old_files = files_last_n_days(raw_data_path, 21, exclude_today = True)
 
-if old_files:
-  past_week_df = pd.concat((pd.read_csv(f) for f in old_files), ignore_index=True)
-else:
-  past_week_df = pd.DataFrame()
+# get unique dates in post_df
+post_dates = post_df['dates'].unique()
 
-if past_week_df.empty:
-    filtered_post_df = post_df
+# get list of filenames in raw_data_path
+filenames = os.listdir(raw_data_path)
+
+# get those filenames that match dates in post_df
+matching_files = []
+for date in post_dates:
+  date_csv = f'{raw_data_path}/{date}_post.csv'
+  if f'{date}_post.csv' in filenames:
+    matching_files.append(date_csv)
+if matching_files:
+  old_posts_df = pd.concat((pd.read_csv(f) for f in matching_files)
+                , ignore_index=True)
+  # filter out posts that are already in old_posts_df
+  filtered_post_df = post_df[
+  ~post_df['submission_ids'].isin(old_posts_df['submission_ids'])
+  ]
 else:
-    filtered_post_df = post_df[
-        ~post_df['submission_ids'].isin(past_week_df['submission_ids'])
-        ]
-print('past week',past_week_df)
-print('current posts',post_df,post_df['titles'])
-print('filtered',filtered_post_df)
+  filtered_post_df = post_df
+
+if filtered_post_df.empty:
+  print("There are no new posts with valid flairs that aren't already saved in the csv sheets. Exiting.")
+  exit()
 
 # ################# make prediction for each post #################
 
@@ -144,9 +154,23 @@ preds_df['accurate'] = (
 
 print(preds_df)
 
-raw_data_csv = os.path.join(raw_data_path, f"sample_{today}.csv")
-if overwrite_day == True or not os.path.exists(raw_data_csv):
-  preds_df.drop('combined_text',axis=1).to_csv(os.path.join(raw_data_csv))
+# get unique dates in preds_df
+preds_dates = preds_df['dates'].unique()
+
+# for each date in preds dates, add posts for that date
+# to appropriate csv
+for date in preds_dates:
+  date_csv = f'{raw_data_path}/{date}_post.csv'
+  new_date_df = preds_df.loc[preds_df['dates'] == date]
+  if os.path.exists(date_csv):
+    old_date_df = pd.read_csv(date_csv, index_col=0)
+    full_date_df = pd.concat([old_date_df, new_date_df])
+  else:
+    full_date_df = new_date_df.reset_index(drop=True)
+  if not dry_run:
+    full_date_df.reset_index(drop=True).to_csv(date_csv)
+  
+
 exit()
 # # for each value in post_df["outcome"] randomly select rows with that value
 # '''

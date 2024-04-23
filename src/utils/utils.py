@@ -134,6 +134,7 @@ def code_outcome(outcome):
       , 'EVERYBODY SUCKS HERE'
       ]
   info_strings = ['NOT ENOUGH INFO', 'NEI', 'NOT ENOUGH INFO HERE']
+  NAH_strings = ['NO A-HOLES HERE','NAH','NO A-HOLES']
   if outcome:
     if outcome.upper() in YTA_strings:
       return float(1)
@@ -143,6 +144,8 @@ def code_outcome(outcome):
       return float(2)
     elif outcome.upper() in info_strings:
       return float(3)
+    elif outcome.upper() in NAH_strings:
+        return float(4)
     
 # copy and replace function
 def copy_and_replace(source_path, destination_path):
