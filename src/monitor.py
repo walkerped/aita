@@ -23,9 +23,11 @@ if not os.path.exists(monitor_archive_path):
     # Create the directory
     os.makedirs(monitor_archive_path)
 
+# set strings that indicate a YTA or NTA outcome
 YTA_strings = ['ASSHOLE','YTA',"YOU'RE THE ASSHOLE"]
 NTA_strings = ['NOT THE A-HOLE','NOT THE ASSHOLE','NTA']
 
+# get today's date
 today = datetime.today().strftime('%Y-%m-%d')
 
 # load variables from .env as environment variables
@@ -73,19 +75,23 @@ for post in new_posts:
   if 200 >= len(post.selftext) >= 6500:
     continue
 
+  # count the number of YTA and NTA's, just to output to terminal
   if post.link_flair_text.upper() in YTA_strings:
     YTA_count += 1
   elif post.link_flair_text.upper() in NTA_strings:
     NTA_count += 1
 
+  # get and format post date
   post_date = datetime.fromtimestamp(post.created_utc).astimezone(pytz.utc).strftime('%Y-%m-%d')
 
+  # add post data to lists
   submission_ids.append(post.id)
   titles.append(post.title)
   texts.append(post.selftext)
   flairs.append(post.link_flair_text)
   dates.append(post_date)
-  
+
+# print counts
 print(f'Got {YTA_count} YTAs and {NTA_count} NTAs after going through ')
 print(f'{post_count} posts.')
 
@@ -98,10 +104,13 @@ post_df = pd.DataFrame({
     'dates': dates,
 })
 
+# create combined text column, for passing to tokenizer
 post_df['combined_text'] = post_df[['titles','texts']].apply(lambda row: ' '.join(row.values.astype(str)), axis=1)
 
+# create a coded outcome column
 post_df['outcome'] = post_df['outcome_str'].apply(code_outcome)
 
+# make directory to store data, if it doesn't exist yet
 os.makedirs(raw_data_path, exist_ok=True)
 
 # get unique dates in post_df
@@ -113,9 +122,12 @@ filenames = os.listdir(raw_data_path)
 # get those filenames that match dates in post_df
 matching_files = []
 for date in post_dates:
+  # set path to output file for date
   date_csv = f'{raw_data_path}/{date}_post.csv'
+  # file is in directory, add to matching files list
   if f'{date}_post.csv' in filenames:
     matching_files.append(date_csv)
+# if there are any matching files, concat them
 if matching_files:
   old_posts_df = pd.concat((pd.read_csv(f) for f in matching_files)
                 , ignore_index=True)
@@ -123,6 +135,7 @@ if matching_files:
   filtered_post_df = post_df[
   ~post_df['submission_ids'].isin(old_posts_df['submission_ids'])
   ]
+# if there are no old
 else:
   filtered_post_df = post_df
 
