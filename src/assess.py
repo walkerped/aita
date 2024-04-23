@@ -43,20 +43,25 @@ for index, row in unresolved_preds_df.iterrows():
   # search the subreddit for the title
   results = aita_subreddit.search(row['title'], limit=1)
 
+  # set title and outcome
   for post in results:
     outcome_str = post.link_flair_text
     post_title = post.title
 
+    # append to lists
     if row['title'] == post_title:
       resolved_titles.append(row['title'])
       resolved_outcomes.append(outcome_str)
 
+# use lists to make dataframe
 resolved_df = pd.DataFrame.from_dict(
     {'title':resolved_titles,'outcome_str':resolved_outcomes}
 )
 
+# code outcome numerically
 resolved_df['outcome'] = resolved_df['outcome_str'].apply(code_outcome)
 
+# if there are no pending predictions that have been resolved, exit
 if resolved_df['outcome'].isnull().all():
   print('None of the pending prediction posts have been assigned a valid flair. Exiting.')
   exit()
@@ -67,7 +72,6 @@ print('\nunresolved\n',unresolved_preds_df,'\nresolved\n',resolved_df,'\nmerged\
 )
 
 #create two new dfs from merged_preds_df one named new_resolved_df with a valid (not NaN) value for outcome, and one new_unresolved_preds_df where outcome is nan
-
 new_resolved_df = merged_preds_df[pd.notnull(merged_preds_df['outcome'])].reset_index()
 new_unresolved_preds_df = merged_preds_df[pd.isnull(
   merged_preds_df['outcome'])].drop(
@@ -80,10 +84,15 @@ if not quiet:
   print('Top rows of df tracking unresolved predictions:')
   print(new_unresolved_preds_df)
 
-label_name_dict = {0:'NTA', 1:'YTA', 2:'Everybody sucks', 3:'Not enough info'}
+# associate outcomes with string
+label_name_dict = {
+  0:'NTA', 1:'YTA', 2:'Everybody sucks', 3:'Not enough info',4:'NAH'
+  }
 
+# set random seed
 seed(a=None, version=2)
 
+# authenticate twitter
 client = tweepy_auth()
 
 if not quiet:
@@ -91,21 +100,27 @@ if not quiet:
 # def assign_flavor_string:
 for index, row in new_resolved_df.iterrows():
 
+  # truncate title if needed
   title_trunc = f"\"{smart_truncate(row['title'])}\""
 
+  # set strings of the judges and reddits rulings
   judge_ruling = label_name_dict[row['pred']]
   reddit_ruling = label_name_dict[row['outcome']]
 
+  # set comment text for outcomes that model wasn't trained on
   if row['outcome']>1:
     comment_string = choice(judges_comments['mistrial'])
     judge_acc = f"Judge bot was not trained to rule on {row['outcome_str']} cases - let's call it a mistrial."
+  # set text if model was correct
   elif row['pred']==row['outcome']:
     comment_string = choice(judges_comments['correct'])
     judge_acc = 'I was correct!'
+  # set string if model was incorrect
   else:
     comment_string = choice(judges_comments['incorrect'])
     judge_acc = 'I was incorrect!'
 
+  # concatenate text together 
   full_string = (
       f"PREDICTION UPDATE: "
       f"In the case of {title_trunc}. Judge bot ruled {judge_ruling}. "
@@ -113,6 +128,7 @@ for index, row in new_resolved_df.iterrows():
       f"https://twitter.com/AITA_judgebot/status/{row['tweet_id']}"
   )
 
+  # print string
   if not quiet:
     print(full_string)
 
@@ -120,8 +136,9 @@ for index, row in new_resolved_df.iterrows():
     # post to twitter
     client.create_tweet(text=full_string)
 
-
+# set todays date
 today = datetime.today().strftime('%Y-%m-%d-%H-%M')
+# save the resolved predictions to csv
 new_resolved_sheet_archive = (f'{archive_sheet_path}/new_resolved_df_{today}.csv')
 
 # write new_resolved_df to the aita_new directory and write new unresolved csv
