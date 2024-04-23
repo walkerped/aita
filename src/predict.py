@@ -45,16 +45,19 @@ subreddit = reddit.subreddit('AmITheAsshole')
 # Fetch new posts
 new_posts = subreddit.new(limit=n_posts)
 
+# create df from praw object
 raw_post_df = pd.DataFrame(
     [ vars(post) for post in subreddit.new(limit=n_posts)]
     )
 
+# keep only vars we need
 vars_to_keep = ['title','selftext','link_flair_text','created_utc','url']
 
 index_flair = raw_post_df[raw_post_df['link_flair_text'].notnull()].index
 
 abbrev_post_df = raw_post_df[vars_to_keep].drop(index_flair)
 
+# filter out posts alread in our current_sheet
 if current_sheet_df.empty:
     filtered_post_df = abbrev_post_df
 else:
@@ -62,15 +65,19 @@ else:
         ~abbrev_post_df['title'].isin(current_sheet_df['title'])
         ]
 
+# format dates
 filtered_post_df.loc[:, 'post_date'] = filtered_post_df['created_utc'].apply(
     lambda x: datetime.fromtimestamp(x).astimezone(pytz.utc).strftime('%Y-%m-%d')
 )
 
+# create a titles with text combined column to pass to the model
 filtered_post_df.loc[:, 'titles_and_texts'] = (filtered_post_df['title']
                                           + filtered_post_df['selftext'])
 
+# make a date created column
 filtered_post_df.loc[:, 'date_created'] = datetime.today().strftime('%Y-%m-%d')
 
+# drop unformated date and text on its own
 post_df = filtered_post_df.drop(['created_utc','selftext'], axis=1)
 
 if not quiet:
@@ -137,6 +144,7 @@ for index, row in selected_preds_df.iterrows():
 
 selected_preds_df["tweet_id"] = tweet_id_list
 
+# update current sheet
 if current_sheet_df.empty:
     new_pred_df = selected_preds_df
 else:
