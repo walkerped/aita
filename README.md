@@ -24,7 +24,7 @@
 
     There's no concrete metric for what accuracy would be considered good. Since Judge Bot was tested on a dataset with an equal number of YTA and NTA posts, we would expect 50% accuracy if Judge Bot hadn't learned anything and was basically 'guessing'. When I tested myself on this task (on 25 posts) I was 84% accurate, so Judge Bot is better than guessing, but not at human level accuracy yet.
 
-    As a final point of reference, I tested chatgpt 3.5 on 25 posts, after explaining the task to it.  While it provided plausible reasons for its predictions, it scored 52% - not reliably better than chance. This suggests that fine tuning a neural network to do this task (i.e. Judge Bot) did lead to better performance than using a general-purpose LLM.
+    As a final point of reference, I tested chatgpt 3.5 on 25 posts, after explaining the task to it.  While it provided plausible reasons for its predictions (even though I never asked for an explanation, tbh), it scored 52% - not reliably better than chance. This suggests that fine tuning a neural network to do this task (i.e. Judge Bot) did lead to better performance than using a general-purpose LLM.
 
 6. When I look through the prediction updates on twitter, Judge Bot seems to have much better accuracy than 71%. What gives?
 
