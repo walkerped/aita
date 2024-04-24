@@ -48,4 +48,6 @@
 
     Finally, I turned the model into a twitter bot to practice putting a neural network into production, and to have an easy way to show off the model I created.
 
+9. How does Judge Bot get run to make automated tweets everyday?
 
+    [A Kaggle notebook](https://www.kaggle.com/code/walkerped/run-aita/) that is scheduled to run daily runs Judge Bot. This notebook downloads the git repo each day to make sure it is current, and runs predict.py (which makes prediction tweets), assess.py (prediction update tweets) and monitor.py (which saves reddit data daily for future use). This notebook uses excel files in a separate git repo to keep track of posts and predictions. This isn't really the main use case for Kaggle notebooks, so it's maybe a little klunky - but it's free, which was my main consideration.
