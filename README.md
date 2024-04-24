@@ -12,9 +12,9 @@
 
 3. How does Judge bot make its predictions?
 
-    Judge bot is a fine tuning of the BigBird, a sparse attention transformer model that is specialized for long texts. I chose BigBird, because AITA posts are typically several paragraphs long, and often reading a single paragraph doesn't give enough context to make a judgement - you really need to digest the whole thing.
+    Judge bot is a fine tuning of [BigBird](https://huggingface.co/docs/transformers/en/model_doc/big_bird), a sparse attention transformer model that is specialized for long texts. I chose BigBird because AITA posts are typically several paragraphs long, and often reading a single paragraph doesn't give enough context to make a judgement - you really need to digest the whole thing.
 
-    BigBird was trained to predict AITA post outcomes on 130,000 posts.  The training dataset had an equal number of YTA and NTA posts. Judgebot's neural network model was finalized after many round of hyperparameter tuning.
+    BigBird was trained to predict AITA post outcomes on 130,000 posts.  The training dataset had an equal number of YTA and NTA posts. Judgebot's neural network model was finalized after many round of hyperparameter tuning, validated on 10,000 posts held out from the training set, and tested on 10,000 more posts.
 
 4. How accurate is Judge bot?
 
@@ -28,7 +28,7 @@
 
 6. When I look through the prediction updates on twitter, Judge Bot seems to have much better accuracy than 71%. What gives?
 
-    When making predictions, Judge Bots neural network produces a continuous value (i.e. logits), that can then be converted into a categorical prediction with low values being a NTA prediction, and high values being a YTA. These continuous values can be used as indicators of the model's confidence, with very high or very low values indicating a prediction the model is very confident in.
+    When making predictions, Judge Bot's neural network produces a continuous value (i.e. logits), that can then be converted into a categorical prediction with low values being a NTA prediction, and high values being a YTA. These continuous values can be used as indicators of the model's confidence, with very high or very low values indicating a prediction the model is very confident in.
 
     I tested Judgebot's accuracy for the top 10% of posts Judge Bot was most confident in predicting. Among these posts, Judge Bot was 93% accurate! The code that posts predictions to twitter runs a batch of recent posts through the model, and selects predictions to tweet out that are among the top 10% for confidence. This should result in much greater accuracy among predictions that get tweeted out.
 
@@ -36,7 +36,7 @@
 
     That's not how I would frame it! There are a lot scenarios where cherry picking the best predictions for use is a valid approach. For example, if you are using a neural network to pick stocks that will increase in price, you probably want to act on only the highest confidence predictions. For other applications (ex. identifying whether a widget is good or faulty), you may be required to generate and act on predictions for each case.
 
-    In case of Judge Bot, I think it is fair to select high confidence posts, in order to demonstrate Judge Bot's legal prowess. 
+    In the case of Judge Bot, I think it is fair to select high confidence posts, in order to demonstrate Judge Bot's legal prowess. 
 
 8. Why have you made Judge Bot?
 
@@ -45,5 +45,7 @@
     For starters, I just really like the AITA subreddit.  It is fun to see what scenarios people want to be judged on, and even more fun to see how others respond to them.
 
     Second, the AITA subreddit represents a source of data with a large number of posts already classified into categories. Typically to do deep learning well, you need a lot of cases. With the AITA subreddit, I have over 100,000 labeled cases that (as far as I can tell) had never been used to make a neural network before. I thought this was a great dataset to use for training a model.
+
+    Finally, I turned the model into a twitter bot to practice putting a neural network into production, and to have an easy way to show off the model I created.
 
 
