@@ -2,7 +2,7 @@
 
 1. What is Judge Bot?
 
-    [Judge Bot](https://twitter.com/AITA_judgebot) is program that makes predictions about the outcomes of posts on the [AITA (Am I the Asshole) subreddit](https://www.reddit.com/r/AmItheAsshole/). These predictions are based on a neural network that has been trained to do this task.
+    [Judge Bot](https://twitter.com/AITA_judgebot) is program that makes predictions about the outcomes of posts on the [AITA (Am I the Asshole) subreddit](https://www.reddit.com/r/AmItheAsshole/) and tweets these predictions. These predictions are based on a neural network that has been trained to do this task.
 
 2. What is the AITA subreddit? What exactly is Judge Bot predicting?
 
